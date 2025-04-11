@@ -57,13 +57,8 @@ const ProfileMenu = ({ isOpen, onClose, avatarRef }: ProfileMenuProps) => {
           <span>Profile</span>
         </button>
         
-        <button 
-          className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-secondary/20 flex items-center gap-2"
-          onClick={() => console.log('Configuration clicked')}
-        >
-          <Settings size={16} />
-          <span>Configuration</span>
-        </button>
+     
+
       </div>
       
       <div className="border-t border-secondary/20 py-1">

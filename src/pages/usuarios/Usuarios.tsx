@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,81 +12,84 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { ListarUsuarios, ObtenerUsuario, CrearUsuario, ActualizarUsuario } from "@/servicios/usuarioServicio";
+
+import { Usuario, HistorialReferido } from "./types";
+
+import { ModalUsuario } from "./modalUsuario";
 
 const Usuarios = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+
+  const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
+  
   const [showReferidosModal, setShowReferidosModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [usuarioEditar, setUsuarioEditar] = useState<Usuario | undefined>(undefined);
 
-  // Datos de ejemplo para la tabla de usuarios
-  const usuarios = [
-    { 
-      id: 1, 
-      nombre: "Juan Pérez", 
-      email: "juan@ejemplo.com", 
-      celular: "+58 412-123-4567", 
-      estado: "Activo",
-      codigoReferidos: "JUAN2023",
-      cantidadReferidos: 8,
-      referidos: [
-        { nombre: "Ana Martínez", email: "ana@ejemplo.com", fecha: "15/02/2025" },
-        { nombre: "Luis Sánchez", email: "luis@ejemplo.com", fecha: "20/02/2025" },
-        { nombre: "Elena Gómez", email: "elena@ejemplo.com", fecha: "25/02/2025" },
-        { nombre: "Pedro Ramírez", email: "pedro@ejemplo.com", fecha: "01/03/2025" },
-        { nombre: "Sofía Torres", email: "sofia@ejemplo.com", fecha: "05/03/2025" },
-        { nombre: "Miguel Díaz", email: "miguel@ejemplo.com", fecha: "08/03/2025" },
-        { nombre: "Laura Fernández", email: "laura@ejemplo.com", fecha: "10/03/2025" },
-        { nombre: "Roberto Castro", email: "roberto@ejemplo.com", fecha: "11/03/2025" }
-      ]
-    },
-    { 
-      id: 2, 
-      nombre: "María López", 
-      email: "maria@ejemplo.com", 
-      celular: "+58 414-987-6543", 
-      estado: "Activo",
-      codigoReferidos: "MARIA2023",
-      cantidadReferidos: 5,
-      referidos: [
-        { nombre: "Carlos Mendoza", email: "carlos.m@ejemplo.com", fecha: "02/03/2025" },
-        { nombre: "Diana Pérez", email: "diana@ejemplo.com", fecha: "05/03/2025" },
-        { nombre: "Fernando Ruiz", email: "fernando@ejemplo.com", fecha: "07/03/2025" },
-        { nombre: "Gabriela Vega", email: "gabriela@ejemplo.com", fecha: "09/03/2025" },
-        { nombre: "Héctor Morales", email: "hector@ejemplo.com", fecha: "10/03/2025" }
-      ]
-    },
-    { 
-      id: 3, 
-      nombre: "Carlos Rodríguez", 
-      email: "carlos@ejemplo.com", 
-      celular: "+58 424-555-7890", 
-      estado: "Inactivo",
-      codigoReferidos: "CARLOS2023",
-      cantidadReferidos: 0,
-      referidos: []
-    },
-  ];
+  const [usuario, setUsuario] = useState<Usuario>();
+  const [listarUsuarios, setListarUsuarios] = useState<Usuario[]>([]);
+  const [listarHistorialReferidos, setListarHistorialReferidos] = useState<HistorialReferido[]>([]);
 
+  const obtenerUsuarios = async () => {
+      const response = await ListarUsuarios();
+      setListarUsuarios(response);
+      console.log(response);
+  }
+
+
+  useEffect(() => {
+    obtenerUsuarios();
+  }, []);
+
+  const obtenerHistorialReferidos = async (id: number) => {
+    const response = await ObtenerUsuario(id);
+    setSelectedUser(response.usuario);
+    setListarHistorialReferidos(response.historial_referidos);
+  }
+
+
+ 
   // Función para abrir el modal de referidos
-  const handleVerReferidos = (usuario: any) => {
-    setSelectedUser(usuario);
+  const handleVerReferidos = async (id: number) => {
+    await obtenerHistorialReferidos(id);
     setShowReferidosModal(true);
   };
 
   // Filtrar usuarios basados en el término de búsqueda
-  const filteredUsuarios = usuarios.filter(
+  const filteredUsuarios = listarUsuarios.filter(
     (usuario) =>
-      usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      usuario.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      usuario.celular.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      usuario.codigoReferidos.toLowerCase().includes(searchTerm.toLowerCase())
+      (usuario.nombre?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (usuario.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (usuario.telefono?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (usuario.codigo_referido?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
+
+  const handleEditarUsuario = (usuario: Usuario) => {
+    setUsuarioEditar(usuario);
+    setShowModal(true);
+  };
+
+  const handleNuevoUsuario = () => {
+    setUsuarioEditar(undefined);
+    setShowModal(true);
+  };
+
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Gestión de Usuarios</h1>
-        <Button className="flex items-center gap-2">
+
+        <ModalUsuario 
+          isOpen={showModal} 
+          onClose={() => setShowModal(false)}
+          usuario={usuarioEditar}
+          onSubmit={() => {}}
+          actualizarListado={obtenerUsuarios}
+        />
+
+        <Button className="flex items-center gap-2" onClick={handleNuevoUsuario}>
           <Plus size={16} />
           <span>Nuevo Usuario</span>
         </Button>
@@ -122,7 +125,7 @@ const Usuarios = () => {
                   <TableHead>Celular</TableHead>
                   <TableHead>Código de referidos</TableHead>
                   <TableHead>Cantidad de referidos</TableHead>
-                  <TableHead>Estado</TableHead>
+                 
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
@@ -132,33 +135,23 @@ const Usuarios = () => {
                     <TableRow key={usuario.id}>
                       <TableCell>{usuario.nombre}</TableCell>
                       <TableCell>{usuario.email}</TableCell>
-                      <TableCell>{usuario.celular}</TableCell>
+                      <TableCell>{usuario.telefono}</TableCell>
                       <TableCell>
                         <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                          {usuario.codigoReferidos}
+                          {usuario.codigo_referido}
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium">{usuario.cantidadReferidos}</span>
+                        <span className="font-medium">{usuario.numero_referido}</span>
                       </TableCell>
-                      <TableCell>
-                        <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            usuario.estado === "Activo"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {usuario.estado}
-                        </span>
-                      </TableCell>
+                     
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button 
                             variant="outline" 
                             size="sm" 
                             className="flex items-center gap-1"
-                            onClick={() => handleVerReferidos(usuario)}
+                            onClick={() => handleVerReferidos(usuario.id)}
                           >
                             <Eye className="h-3.5 w-3.5" />
                             <span>Ver</span>
@@ -167,6 +160,7 @@ const Usuarios = () => {
                             variant="ghost" 
                             size="sm"
                             className="flex items-center gap-1"
+                            onClick={() => handleEditarUsuario(usuario)}
                           >
                             <Edit className="h-3.5 w-3.5" />
                             <span>Editar</span>
@@ -178,7 +172,7 @@ const Usuarios = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={7} className="h-24 text-center">
-                      No se encontraron resultados.
+                      Cargando usuarios...
                     </TableCell>
                   </TableRow>
                 )}
@@ -187,6 +181,7 @@ const Usuarios = () => {
           </div>
         </CardContent>
       </Card>
+
 
       {/* Modal de Referidos */}
       <Dialog open={showReferidosModal} onOpenChange={setShowReferidosModal}>
@@ -197,7 +192,7 @@ const Usuarios = () => {
               Información de Referidos
             </DialogTitle>
             <DialogDescription>
-              Resumen de referidos para {selectedUser?.nombre}
+              Historial de referidos de {selectedUser?.nombre}
             </DialogDescription>
           </DialogHeader>
           
@@ -213,7 +208,7 @@ const Usuarios = () => {
                 <h3 className="text-sm font-medium text-muted-foreground">Código de Referido</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1 text-sm">
-                    {selectedUser?.codigoReferidos}
+                    {selectedUser?.codigo_referido}
                   </Badge>
                 </div>
               </div>
@@ -224,11 +219,11 @@ const Usuarios = () => {
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-medium flex items-center gap-2">
                   <Gift className="h-5 w-5 text-primary" />
-                  <span>Referidos ({selectedUser?.cantidadReferidos})</span>
+                  <span>Referidos ({selectedUser?.numero_referido || 0})</span>
                 </h3>
               </div>
               
-              {selectedUser?.cantidadReferidos > 0 ? (
+              {listarHistorialReferidos.length > 0 ? (
                 <div className="border rounded-md overflow-hidden">
                   <Table>
                     <TableHeader>
@@ -239,15 +234,16 @@ const Usuarios = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {selectedUser?.referidos.map((referido: any, index: number) => (
+                      {listarHistorialReferidos.map((referido, index) => (
                         <TableRow key={index}>
-                          <TableCell className="font-medium">{referido.nombre}</TableCell>
-                          <TableCell>{referido.email}</TableCell>
-                          <TableCell>{referido.fecha}</TableCell>
+                          <TableCell className="font-medium">{referido.usuario_referido.nombre}</TableCell>
+                          <TableCell>{referido.usuario_referido.email}</TableCell>
+                          <TableCell>{new Date(referido.created_at).toLocaleDateString()}</TableCell>
+
                         </TableRow>
                       ))}
                     </TableBody>
-                  </Table>
+                  </Table> 
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center p-8 text-center border rounded-md bg-muted/10">
@@ -262,6 +258,12 @@ const Usuarios = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+
+
+
+
+
     </div>
   );
 };

@@ -5,7 +5,7 @@ const authApi = axios.create({
     withCredentials: true
 })
 
-/* authApi.interceptors.request.use(config => {
+ authApi.interceptors.request.use(config => {
 
     const token = localStorage.getItem('token');
     if (token) {
@@ -14,7 +14,7 @@ const authApi = axios.create({
     
     return config;
 
-});*/
+});
 
 
 export default authApi;

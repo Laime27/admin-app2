@@ -2,13 +2,10 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
-  LayoutPanelLeft, 
-  Layers, 
   Users,
   Calendar,
   FileText,
   Plane,
-  Settings as SettingsIcon,
   X
 } from "lucide-react";
 
@@ -18,6 +15,11 @@ interface SidebarItemProps {
   href: string;
   active?: boolean;
 }
+
+const links = [
+
+]
+
 
 const SidebarItem = ({ icon, label, href, active }: SidebarItemProps) => {
   return (
@@ -46,7 +48,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
   return (
     <>
-      {/* Overlay for mobile */}
+      
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -77,64 +79,41 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         
         <div className="flex flex-col py-4 space-y-1">
           <div className="px-4 py-2">
-            <p className="text-xs font-medium text-gray-400">Main Menu</p>
+            <p className="text-xs font-medium text-gray-400">Modulos</p>
           </div>
           
-          <SidebarItem
-            icon={<LayoutPanelLeft className="sidebar-icon" />}
-            label="Panel Control"
-            href="/panel-control"
-            active={pathname === "/panel-control"}
-          />
-          
-          <SidebarItem
-            icon={<Layers className="sidebar-icon" />}
-            label="Categorías"
-            href="/categorias"
-            active={pathname === "/categorias"}
-          />
+        
           
           <SidebarItem
             icon={<Users className="sidebar-icon" />}
             label="Usuarios"
-            href="/usuarios"
-            active={pathname === "/usuarios"}
+            href="/dashboard/usuarios"
+            active={pathname === "dashboard/usuarios"}
           />
           
           <SidebarItem
             icon={<Calendar className="sidebar-icon" />}
             label="Citas"
-            href="/citas"
-            active={pathname === "/citas"}
+            href="/dashboard/citas"
+            active={pathname === "/dashboard/citas"}
           />
           
           <SidebarItem
             icon={<FileText className="sidebar-icon" />}
             label="Documentos"
-            href="/documentos"
-            active={pathname === "/documentos"}
+            href="/dashboard/documentos"
+            active={pathname === "dashboard/documentos"}
           />
           
           <SidebarItem
             icon={<Plane className="sidebar-icon" />}
             label="Migraciones"
-            href="/migraciones"
-            active={pathname === "/migraciones"}
+            href="/dashboard/migraciones"
+            active={pathname === "/dashboard/migraciones"}
           />
         </div>
         
-        <div className="mt-auto flex flex-col py-4 border-t border-sidebar-border">
-          <div className="px-4 py-2">
-            <p className="text-xs font-medium text-gray-400">Settings</p>
-          </div>
-          
-          <SidebarItem
-            icon={<SettingsIcon className="sidebar-icon" />}
-            label="Settings"
-            href="/settings"
-            active={pathname === "/settings"}
-          />
-        </div>
+      
       </aside>
     </>
   );

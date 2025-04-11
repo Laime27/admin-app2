@@ -80,7 +80,7 @@ const Login = () => {
           description: "Has iniciado sesión correctamente",
         });
         
-        navigate('/');
+        navigate('/dashboard/usuarios');
       } else {
         toast({
           variant: "destructive",
@@ -113,7 +113,7 @@ const Login = () => {
               Email
             </label>
             <input
-              type="email"
+              type="text"
               id="email"
               name="email"
               value={formData.email}
@@ -121,8 +121,8 @@ const Login = () => {
               className={`w-full px-3 py-2 bg-secondary/30 border ${
                 errors.email ? 'border-destructive' : 'border-secondary'
               } rounded-md text-white text-sm focus:outline-none focus:ring-1 focus:ring-primary`}
-              placeholder="correo@ejemplo.com"
               disabled={isLoading}
+
             />
             {errors.email && (
               <p className="mt-1 text-sm text-destructive">{errors.email}</p>
