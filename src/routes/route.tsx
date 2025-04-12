@@ -6,6 +6,9 @@ import Migraciones from "@/pages/migracion/Migraciones";
 import Usuarios from "@/pages/usuarios/Usuarios";
 import Login from "@/pages/login/login";
 import Dashboard from "@/layout/page";
+import Categorias from "@/pages/categorias/Categorias";
+
+
 
 export const routes = [
   { path: "/", element: <Login /> },
@@ -21,6 +24,9 @@ export const routes = [
       { path: "documentos", element: <Documentos /> },
       { path: "migraciones", element: <Migraciones /> },
       { path: "usuarios", element: <Usuarios /> },
+      { path: "categorias", element: <Categorias /> },
+
+      
     ],
   },
 ];

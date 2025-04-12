@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 import { login } from '@/servicios/loginServicio';
 
+import useAuthStore from '@/store/authStore';
 
 
 const Login = () => {
@@ -18,6 +19,8 @@ const Login = () => {
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  const [errorMensaje, setErrorMensaje] = useState('');
 
   const validateForm = () => {
     let isValid = true;
@@ -66,27 +69,35 @@ const Login = () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
+    setErrorMensaje('');
     try {
       const response = await login(formData.email, formData.password);
-      
       if (response.status === 200) {
       
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
         }
+
+        const user = response.data.user;
+        useAuthStore.getState().setUser(user);
         
+
         toast({
           title: "¡Bienvenido!",
           description: "Has iniciado sesión correctamente",
         });
         
         navigate('/dashboard/usuarios');
+
       } else {
+        setErrorMensaje(response.data.mensaje || "Error al iniciar sesión");
+
         toast({
           variant: "destructive",
           title: "Error",
           description: response.data.mensaje || "Error al iniciar sesión",
         });
+
       }
     } catch (error) {
       toast({
@@ -149,6 +160,11 @@ const Login = () => {
               <p className="mt-1 text-sm text-destructive">{errors.password}</p>
             )}
           </div>
+
+          <span className="mt-2 text-sm text-destructive block">
+            {errorMensaje && errorMensaje}
+          </span>
+
 
           <button
             type="submit"

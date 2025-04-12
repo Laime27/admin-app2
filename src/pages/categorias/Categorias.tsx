@@ -19,6 +19,7 @@ import { useToast } from "@/components/ui/use-toast";
 interface Categoria {
   id: number;
   nombre: string;
+  created_at: string;
 }
 
 const Categorias = () => {
@@ -40,13 +41,12 @@ const Categorias = () => {
     try {
       setCargando(true);
       const respuesta = await ListarCategorias();
-      if (respuesta?.status === 200) {
-        setCategorias(respuesta.data);
-      } else {
-        mostrarError("No se pudieron cargar las categorías");
-      }
+
+        setCategorias(respuesta); 
+        console.log(respuesta); 
+    
     } catch (error) {
-      mostrarError("Error de conexión con el servidor");
+      mostrarError("No se pudieron cargar las categorías");
     } finally {
       setCargando(false);
     }
@@ -77,14 +77,13 @@ const Categorias = () => {
     setModalEliminarAbierto(true);
   };
 
-  const manejarConfirmarEliminar = async () => {
+  const manejarConfirmarEliminar= async () => {
     if (categoriaAEliminar) {
       try {
         setCargando(true);
 
        const respuesta = await EliminarCategoria(categoriaAEliminar.id);
 
-       if(respuesta.status === 204){
         mostrarExito("Categoría eliminada correctamente");
 
         await cargarCategorias();
@@ -92,7 +91,7 @@ const Categorias = () => {
         setModalEliminarAbierto(false);
 
         setCategoriaAEliminar(null);
-       }
+    
 
       } catch (error) {
         mostrarError("Error de conexión con el servidor");
@@ -112,25 +111,21 @@ const Categorias = () => {
  
   const crearCategoria = async (nombre: string) => {
     const respuesta = await CrearCategoria(nombre);
-    if (respuesta?.status === 201 || respuesta?.status === 200) {
+    
       mostrarExito("Categoría creada correctamente");
       await cargarCategorias();
       setModalAbierto(false);
-    } else {
-      mostrarError("No se pudo crear la categoría");
-    }
+    
   };
 
   const actualizarCategoria = async (id: number, nombre: string) => {
     const respuesta = await ActualizarCategoria(id, nombre);
-    if (respuesta?.status === 200) {
+   
       mostrarExito("Categoría actualizada correctamente");
       await cargarCategorias();
       setModalAbierto(false);
       setCategoriaSeleccionada(null);
-    } else {
-      mostrarError("No se pudo actualizar la categoría");
-    }
+   
   };
 
   const mostrarExito = (mensaje: string) => {

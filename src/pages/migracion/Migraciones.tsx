@@ -277,7 +277,7 @@ const Migraciones = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
-                      Cargando migraciones...
+                      no hay migraciones...
                     </TableCell>
                   </TableRow>
                 )}

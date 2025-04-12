@@ -52,3 +52,15 @@ export const historialCita = async (id: number) => {
     }
 }
 
+export const eliminarCita = async (id: number) => {
+    try {
+        const response = await axios.delete(`/api/citas/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error al eliminar cita:", error);
+    }
+}
+
+
+
+

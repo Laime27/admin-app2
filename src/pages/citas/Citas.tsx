@@ -29,9 +29,10 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 
-import { listarCitas, historialCita} from "@/servicios/citasServicio";
+import { listarCitas, historialCita , eliminarCita} from "@/servicios/citasServicio";
 import { ListarUsuarios } from "@/servicios/usuarioServicio";
 import {ListarCategorias } from "@/servicios/categoriaServicio";
 
@@ -39,6 +40,17 @@ import { Usuario } from "@/pages/usuarios/types";
 import ModalVer from "./modalVer";
 import ModalCrearActualizar from "./modalCrearActualizar";
 import ModalHistorial from "./modalHistorial";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 
 export interface UsuarioCitas {
@@ -84,6 +96,7 @@ const Citas = () => {
   const [historialCitas, setHistorialCitas] = useState<any[]>([]);
 
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [modalEliminarAbierto, setModalEliminarAbierto] = useState(false);
 
 
 
@@ -182,6 +195,49 @@ const Citas = () => {
       console.error("Error al guardar la cita:", error);
     }
   };
+
+
+  const manejarConfirmarEliminar = async (id) => {
+     
+        try {
+     
+         const respuesta = await eliminarCita(id);
+
+          await listadoCitas();
+  
+          setModalEliminarAbierto(false);
+
+        } catch (error) {
+        
+        } finally {
+         
+        }
+   
+    };
+
+
+  const renderizarModalEliminar = (id) => (
+    <AlertDialog open={modalEliminarAbierto} onOpenChange={setModalEliminarAbierto}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta acción no se puede deshacer. Se eliminará permanentemente la cita 
+        
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel >Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-red-500 hover:bg-red-600"
+            onClick={() => manejarConfirmarEliminar(id)}
+
+          >
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   return (
 
@@ -329,6 +385,17 @@ const Citas = () => {
                             <History className="h-4 w-4" />
                             <span>Historial</span>
                           </Button>
+
+                          <Button
+                          size="icon"
+                          variant="ghost"
+                          className="w-7 h-7 bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                          onClick={() => renderizarModalEliminar(cita.id)}
+                          
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+
                         </div>
                       </TableCell>
                     </TableRow>

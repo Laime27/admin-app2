@@ -429,7 +429,7 @@ const Documentos = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={7} className="h-24 text-center">
-                      Cargando documentos...
+                     no hay documentos...
                     </TableCell>
                   </TableRow>
                 )}

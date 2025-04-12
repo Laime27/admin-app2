@@ -83,7 +83,13 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           </div>
           
         
-          
+          <SidebarItem
+            icon={<Users className="sidebar-icon" />}
+            label="Categorias"
+            href="/dashboard/categorias"
+            active={pathname === "dashboard/categorias"}
+          />
+
           <SidebarItem
             icon={<Users className="sidebar-icon" />}
             label="Usuarios"
