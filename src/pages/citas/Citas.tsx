@@ -30,11 +30,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
+  Loader2,
 } from "lucide-react";
 
-import { listarCitas, historialCita , eliminarCita} from "@/servicios/citasServicio";
+import {
+  listarCitas,
+  historialCita,
+  eliminarCita,
+  obtenerCitaDatos,
+  precargarDatos
+} from "@/servicios/citasServicio";
 import { ListarUsuarios } from "@/servicios/usuarioServicio";
-import {ListarCategorias } from "@/servicios/categoriaServicio";
+import { ListarCategorias } from "@/servicios/categoriaServicio";
 
 import { Usuario } from "@/pages/usuarios/types";
 import ModalVer from "./modalVer";
@@ -51,7 +58,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
-
 
 export interface UsuarioCitas {
   id: number;
@@ -71,22 +77,18 @@ export interface UsuarioClass {
   nombre: string;
   email: string;
 }
+
 interface Categoria {
   id: number;
   nombre: string;
-
 }
-
 
 const Citas = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
   const [citaSeleccionada, setCitaSeleccionada] = useState<number | null>(null);
-  
   const [citas, setCitas] = useState<UsuarioCitas[]>([]);
   const [citasFiltradas, setCitasFiltradas] = useState<UsuarioCitas[]>([]);
-  
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [modalVerAbierto, setModalVerAbierto] = useState(false);
   const [modalCrearActualizarAbierto, setModalCrearActualizarAbierto] = useState(false);
@@ -94,194 +96,179 @@ const Citas = () => {
   const [citaParaEditar, setCitaParaEditar] = useState<UsuarioCitas | null>(null);
   const [modalHistorialAbierto, setModalHistorialAbierto] = useState(false);
   const [historialCitas, setHistorialCitas] = useState<any[]>([]);
-
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [modalEliminarAbierto, setModalEliminarAbierto] = useState(false);
 
-
+  const { toast } = useToast();
 
   const listadoCitas = async () => {
-    try {
-      setIsLoading(true);
-      const citasData = await listarCitas();
+    const citasData = await listarCitas();
+    if (citasData && citasData.length > 0) {
       setCitas(citasData);
-      
-    } catch (error) {
-      console.error("Error al cargar citas:", error);
-    } finally {
-      setIsLoading(false);
+      setCitasFiltradas(citasData);
     }
+    setIsLoading(false);
   };
 
   const cargarUsuarios = async () => {
-    try {
-      const usuariosData = await ListarUsuarios();
+    const usuariosData = await ListarUsuarios();
+    if (usuariosData) {
       setUsuarios(usuariosData);
-    } catch (error) {
-      console.error("Error al cargar usuarios:", error);
     }
   };
 
-  const cargarCategorias = async() =>{
-    try {
-      const categoriasData = await ListarCategorias();
+  const cargarCategorias = async () => {
+    const categoriasData = await ListarCategorias();
+    if (categoriasData) {
       setCategorias(categoriasData);
-      console.log(categoriasData);
-    } catch (error) {
-      console.error("Error al cargar categorias:", error);
     }
-  }
+  };
 
+  // Carga inicial de datos
   useEffect(() => {
-    cargarUsuarios();
-    cargarCategorias();
-    listadoCitas();
-
+    const inicializarDatos = async () => {
+      setIsLoading(true);
+      // Cargar todos los datos en paralelo para mayor velocidad
+      await Promise.all([
+        listadoCitas(),
+        cargarUsuarios(),
+        cargarCategorias(),
+        precargarDatos() // Precargar detalles de citas
+      ]);
+    };
+    
+    inicializarDatos();
   }, []);
 
+  // Filtrado de citas
   useEffect(() => {
-    const filtrarCitas = () => {
-      const terminoBusqueda = searchTerm.toLowerCase();
-      const citasFiltradas = citas.filter((cita) => 
-        cita.usuario.nombre.toLowerCase().includes(terminoBusqueda) ||
-        cita.asunto.toLowerCase().includes(terminoBusqueda) ||
-        cita.sede.toLowerCase().includes(terminoBusqueda) ||
-        cita.fecha_cita.toLowerCase().includes(terminoBusqueda) ||
-        cita.estado.toLowerCase().includes(terminoBusqueda)
-      );
-      setCitasFiltradas(citasFiltradas);
-    };
-
-    filtrarCitas();
-
+    if (!searchTerm.trim()) {
+      setCitasFiltradas(citas);
+      return;
+    }
+    
+    const terminoBusqueda = searchTerm.toLowerCase();
+    const filtradas = citas.filter((cita) =>
+      (cita.usuario?.nombre || '').toLowerCase().includes(terminoBusqueda) ||
+      cita.asunto.toLowerCase().includes(terminoBusqueda) ||
+      cita.sede.toLowerCase().includes(terminoBusqueda) ||
+      cita.fecha_cita.toLowerCase().includes(terminoBusqueda) ||
+      cita.estado.toLowerCase().includes(terminoBusqueda)
+    );
+    
+    setCitasFiltradas(filtradas);
   }, [searchTerm, citas]);
-  
 
-
-  const handleVerResumen =  (id: number) => {
-      setCitaSeleccionada(id);
-      setModalVerAbierto(true);
-      
+  const handleVerResumen = (id: number) => {
+    setCitaSeleccionada(id);
+    setModalVerAbierto(true);
   };
 
-  const handleEditCita = async (id: number) => {
+  const handleEditCita = (id: number) => {
+    // Buscar la cita en los datos ya cargados
     const citaToEdit = citas.find(cita => cita.id === id);
-
+    
     if (citaToEdit) {
       setCitaParaEditar(citaToEdit);
-      console.log(citaToEdit);
       setModalCrearActualizarAbierto(true);
     }
   };
 
   const handleShowHistorial = async (id: number) => {
-    try {
-      const historial = await historialCita(id);
-      console.log(historial);
-      setHistorialCitas(historial);
-      console.log(historialCitas);
-      setModalHistorialAbierto(true);
-    } catch (error) {
-      console.error("Error al cargar el historial:", error);
+    setCitaSeleccionada(id);
+    
+    // Abrir el modal inmediatamente
+    setModalHistorialAbierto(true);
+    
+    // Cargar los datos del historial
+    const historialData = await historialCita(id);
+    if (historialData) {
+      setHistorialCitas(historialData);
     }
   };
 
-  const handleSaveCita = async (formData: any) => {
-    try {
-      await listadoCitas();
-      setModalCrearActualizarAbierto(false);
-      setCitaParaEditar(null);
-    } catch (error) {
-      console.error("Error al guardar la cita:", error);
-    }
+  const handleSaveCita = (formData: any) => {
+    listadoCitas();
   };
-
 
   const manejarConfirmarEliminar = async (id) => {
-     
-        try {
-     
-         const respuesta = await eliminarCita(id);
+    await eliminarCita(id);
+    await listadoCitas();
+    setModalEliminarAbierto(false);
+  };
 
-          await listadoCitas();
-  
-          setModalEliminarAbierto(false);
-
-        } catch (error) {
-        
-        } finally {
-         
-        }
-   
-    };
-
-
-  const renderizarModalEliminar = (id) => (
-    <AlertDialog open={modalEliminarAbierto} onOpenChange={setModalEliminarAbierto}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta acción no se puede deshacer. Se eliminará permanentemente la cita 
-        
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel >Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-red-500 hover:bg-red-600"
-            onClick={() => manejarConfirmarEliminar(id)}
-
-          >
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
+  const renderizarModalEliminar = (id) => {
+    setCitaSeleccionada(id);
+    setModalEliminarAbierto(true);
+    return null;
+  };
 
   return (
-
-   
-
-
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Gestión de Citas</h1>
-        <Button 
+        <Button
           className="flex items-center gap-2"
           onClick={() => {
             setCitaParaEditar(null);
             setModalCrearActualizarAbierto(true);
           }}
         >
-          <Plus size={16} />
+          <Plus className="h-4 w-4" />
           <span>Nueva Cita</span>
         </Button>
       </div>
 
-      <ModalVer
-        id={citaSeleccionada ?? 1}
-        isOpen={modalVerAbierto}
-        onClose={() => setModalVerAbierto(false)}
-      />
+      {/* Modales */}
+      {modalVerAbierto && (
+        <ModalVer
+          id={citaSeleccionada!}
+          isOpen={modalVerAbierto}
+          onClose={() => setModalVerAbierto(false)}
+        />
+      )}
 
-      <ModalCrearActualizar
-        isOpen={modalCrearActualizarAbierto}
-        onClose={() => {
-          setModalCrearActualizarAbierto(false);
-          setCitaParaEditar(null);
-        }}
-        onSave={handleSaveCita}
-        citaToEdit={citaParaEditar}
-        usuarios={usuarios}
-        categorias={categorias}
-      />
+      {modalCrearActualizarAbierto && (
+        <ModalCrearActualizar
+          isOpen={modalCrearActualizarAbierto}
+          onClose={() => {
+            setModalCrearActualizarAbierto(false);
+            setCitaParaEditar(null);
+          }}
+          onSave={handleSaveCita}
+          citaToEdit={citaParaEditar}
+          usuarios={usuarios}
+          categorias={categorias}
+        />
+      )}
 
-      <ModalHistorial
-        isOpen={modalHistorialAbierto}
-        onClose={() => setModalHistorialAbierto(false)}
-        historial={historialCitas}
-      />
+      {modalHistorialAbierto && (
+        <ModalHistorial
+          isOpen={modalHistorialAbierto}
+          onClose={() => setModalHistorialAbierto(false)}
+          historial={historialCitas}
+        />
+      )}
+
+      <AlertDialog open={modalEliminarAbierto} onOpenChange={setModalEliminarAbierto}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente la cita
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600"
+              onClick={() => manejarConfirmarEliminar(citaSeleccionada!)}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Card>
         <CardHeader className="bg-muted/50">
@@ -290,8 +277,7 @@ const Citas = () => {
             <span>Calendario de Citas</span>
           </CardTitle>
           <CardDescription>
-            Gestione las citas migratorias de sus clientes en las diferentes
-            sedes.
+            Gestione las citas migratorias de sus clientes en las diferentes sedes.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
@@ -323,7 +309,16 @@ const Citas = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {citasFiltradas.length > 0 ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="h-24">
+                      <div className="flex justify-center items-center h-full">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+                        <span className="text-muted-foreground">Cargando citas...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : citasFiltradas.length > 0 ? (
                   citasFiltradas.map((cita) => (
                     <TableRow key={cita.id}>
                       <TableCell>{cita.id}</TableCell>
@@ -387,15 +382,13 @@ const Citas = () => {
                           </Button>
 
                           <Button
-                          size="icon"
-                          variant="ghost"
-                          className="w-7 h-7 bg-red-500/20 text-red-500 hover:bg-red-500/30"
-                          onClick={() => renderizarModalEliminar(cita.id)}
-                          
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-
+                            size="icon"
+                            variant="ghost"
+                            className="w-7 h-7 bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                            onClick={() => renderizarModalEliminar(cita.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -403,9 +396,7 @@ const Citas = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={8} className="h-24 text-center">
-                      {isLoading
-                        ? "Cargando citas..."
-                        : "No se encontraron citas."}
+                      No se encontraron citas.
                     </TableCell>
                   </TableRow>
                 )}
