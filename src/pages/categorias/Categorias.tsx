@@ -19,6 +19,8 @@ import { useToast } from "@/components/ui/use-toast";
 interface Categoria {
   id: number;
   nombre: string;
+  imagen: string | null;
+  imagen_ruta: string | null;
   created_at: string;
 }
 
@@ -52,20 +54,34 @@ const Categorias = () => {
     }
   };
 
-  const manejarGuardarCategoria = async (nombre: string, id?: number) => {
+  const manejarGuardarCategoria = async (nombre: string, id?: number, imagen?: File | null) => {
     try {
       setCargando(true);
-      if (id) {
-        await actualizarCategoria(id, nombre);
-      } else {
-        await crearCategoria(nombre);
+  
+      const formData = new FormData();
+      
+      formData.append("nombre", nombre);
+      if (imagen) {
+        formData.append("imagen", imagen);
       }
+  
+      if (id) {
+        await ActualizarCategoria(id, formData); 
+        toast({ title: "Categoría actualizada correctamente" });
+      } else {
+        await CrearCategoria(formData);
+        toast({ title: "Categoría creada correctamente" });
+      }
+  
+      setModalAbierto(false);
+      cargarCategorias();
     } catch (error) {
       mostrarError("Error de conexión con el servidor");
     } finally {
       setCargando(false);
     }
   };
+  
 
   const manejarClickEditar = (categoria: Categoria) => {
     setCategoriaSeleccionada(categoria);
@@ -109,24 +125,23 @@ const Categorias = () => {
   };
 
  
-  const crearCategoria = async (nombre: string) => {
-    const respuesta = await CrearCategoria(nombre);
+    const crearCategoria = async (formData: FormData) => {
+      const respuesta = await CrearCategoria(formData);
     
       mostrarExito("Categoría creada correctamente");
       await cargarCategorias();
       setModalAbierto(false);
+    };
     
-  };
-
-  const actualizarCategoria = async (id: number, nombre: string) => {
-    const respuesta = await ActualizarCategoria(id, nombre);
-   
+    const actualizarCategoria = async (id: number, formData: FormData) => {
+      const respuesta = await ActualizarCategoria(id, formData);
+    
       mostrarExito("Categoría actualizada correctamente");
       await cargarCategorias();
       setModalAbierto(false);
       setCategoriaSeleccionada(null);
-   
-  };
+    };
+  
 
   const mostrarExito = (mensaje: string) => {
     toast({
@@ -165,13 +180,30 @@ const Categorias = () => {
 
   const renderizarTabla = () => (
     <div className="divide-y divide-border">
-      <div className="grid grid-cols-2 p-4 text-sm font-medium text-muted-foreground">
+      <div className="grid grid-cols-3 p-4 text-sm font-medium text-muted-foreground">
+        
+        <div>Imagen</div> 
         <div>Nombre</div>
         <div className="text-right">Acciones</div>
       </div>
       
       {categorias.map((categoria) => (
-        <div key={categoria.id} className="grid grid-cols-2 p-4 items-center">
+        <div key={categoria.id} className="grid grid-cols-3 p-4 items-center">
+
+          <div className="flex items-center gap-2">
+            {categoria.imagen && (
+              <img
+                src={categoria.imagen_ruta}
+                alt={categoria.nombre}
+                className="w-10 h-10 rounded-full"
+              />
+            )}
+            {!categoria.imagen && (
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500">C</span>
+              </div>
+            )}
+          </div>
           <div>{categoria.nombre}</div>
           <div className="flex items-center justify-end gap-2">
             <Button

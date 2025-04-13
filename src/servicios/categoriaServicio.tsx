@@ -13,29 +13,24 @@ export const ListarCategorias = async () => {
     }
 }
 
-export const CrearCategoria = async (nombre: string) => {
-    try {
-        const response = await axios.post('/api/categoria', { nombre });
-        return response.data;
+export const CrearCategoria = async (data: FormData) => {
+    const response = await axios.post('/api/categoria', data, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return response.data;
+};
 
-    } catch (error: any) {
-        if (error.response) {
-            return error.response;
-        }
-    }
-}
+export const ActualizarCategoria = async (id: number, data: FormData) => {
+    const response = await axios.post(`/api/categoria/${id}?_method=PUT`, data, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return response.data;
+};
 
-export const ActualizarCategoria = async (id: number, nombre: string) => {
-    try {
-        const response = await axios.put(`/api/categoria/${id}`, { nombre });
-        return response.data;
-
-    } catch (error: any) {
-        if (error.response) {
-            return error.response;
-        }
-    }
-}
 
 
 export const EliminarCategoria = async (id: number) => {    

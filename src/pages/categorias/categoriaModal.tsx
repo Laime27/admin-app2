@@ -18,7 +18,7 @@ interface Categoria {
 interface CategoriaModalProps {
   isOpen: boolean;
   onOpenChange: (abierto: boolean) => void;
-  onSave: (nombre: string, id?: number) => void;
+  onSave: (nombre: string, id?: number, imagen?: File | null) => void;
   category?: Categoria;
   trigger?: React.ReactNode;
   isLoading?: boolean;
@@ -33,18 +33,21 @@ const CategoriaModal = ({
   isLoading = false
 }: CategoriaModalProps) => {
   const [nombreCategoria, setNombreCategoria] = useState("");
+  const [imagenCategoria, setImagenCategoria] = useState<File | null>(null);
 
   useEffect(() => {
     if (category) {
       setNombreCategoria(category.nombre);
+      setImagenCategoria(null); 
     } else {
       setNombreCategoria("");
+      setImagenCategoria(null);
     }
   }, [category, isOpen]);
 
   const manejarGuardar = () => {
     if (nombreCategoria.trim()) {
-      onSave(nombreCategoria.trim(), category?.id);
+      onSave(nombreCategoria.trim(), category?.id, imagenCategoria);
     }
   };
 
@@ -72,7 +75,7 @@ const CategoriaModal = ({
             {category ? "Editar Categoría" : "Agregar Nueva Categoría"}
           </DialogTitle>
         </DialogHeader>
-        <div className="p-4">
+        <div className="p-4 space-y-4">
           <Input
             type="text"
             placeholder="Nombre de la categoría"
@@ -80,6 +83,26 @@ const CategoriaModal = ({
             onChange={(e) => setNombreCategoria(e.target.value)}
             disabled={isLoading}
           />
+
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) setImagenCategoria(file);
+            }}
+            disabled={isLoading}
+          />
+
+          {imagenCategoria && (
+            <div className="text-center">
+              <img
+                src={URL.createObjectURL(imagenCategoria)}
+                alt="Vista previa"
+                className="max-h-40 mx-auto object-contain rounded-md"
+              />
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button
