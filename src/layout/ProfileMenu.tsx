@@ -36,7 +36,7 @@ const ProfileMenu = ({ isOpen, onClose, avatarRef }: ProfileMenuProps) => {
   }, [isOpen, onClose, avatarRef]);
 
   const handleProfileClick = () => {
-    navigate('/profile');
+    navigate('perfil');
     onClose();
   };
 
@@ -48,12 +48,13 @@ const ProfileMenu = ({ isOpen, onClose, avatarRef }: ProfileMenuProps) => {
       className="absolute top-14 right-4 w-48 bg-card rounded-md shadow-lg border border-secondary/20 py-1 z-50"
     >
       <div className="px-4 py-2 border-b border-secondary/20">
-     <p className="text-sm font-medium text-white">
-        {user?.nombre || 'Usuario'}
-      </p>
-      <p className="text-xs text-gray-400">
-        {user?.email || 'correo@ejemplo.com'}
-      </p>
+      
+        <p className="text-sm font-medium text-white">
+            {user?.nombre || 'Usuario'}
+          </p>
+          <p className="text-xs text-gray-400">
+            {user?.email || 'correo@ejemplo.com'}
+          </p>
       </div>
       
       <div className="py-1">

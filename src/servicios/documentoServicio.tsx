@@ -32,3 +32,18 @@ export const subirDocumento = async (formData: FormData) => {
     return response.data;
  }
 
+export const descargarDocumento = async (nombre_documento: string) => {
+
+    const response = await axios.get(`/api/documentos/descargar/${nombre_documento}`, {
+        responseType: 'blob',
+    });
+    return response.data;
+    
+}
+
+
+
+
+// Route::get('/documentos/descargar/{nombre_documento}', [documentoController::class, 'descargar']);
+
+

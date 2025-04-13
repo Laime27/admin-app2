@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
-import { listarDocumentos, subirDocumento, actualizarDocumento } from "@/servicios/documentoServicio";
+import { listarDocumentos, subirDocumento, actualizarDocumento , descargarDocumento } from "@/servicios/documentoServicio";
 
 import { ListarUsuarios } from "@/servicios/usuarioServicio";
 
@@ -128,16 +128,36 @@ const Documentos = () => {
   };
 
 
-  const descargarDocumento = (url: string, nombreArchivo: string) => {
-    const link = document.createElement("a");
+//   const descargarDocumento = (url: string, nombreArchivo: string) => {
+//     const link = document.createElement("a");
+//     link.href = url;
+//     link.setAttribute("download", nombreArchivo); 
+//     link.style.display = "none";
+//     document.body.appendChild(link);
+//     link.click();
+//     document.body.removeChild(link);
+// };
+
+
+
+const descargarDocumentoSeleccionado = async (nombreDocumento: string) => {
+  try {
+    const blob = await descargarDocumento(nombreDocumento);
+
+    const url = window.URL.createObjectURL(new Blob([blob]));
+
+    const link = document.createElement('a');
     link.href = url;
-    link.setAttribute("download", nombreArchivo); 
-    link.style.display = "none";
+    link.setAttribute('download', nombreDocumento); // nombre con el que se descarga
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-};
+    link.remove();
 
+    window.URL.revokeObjectURL(url); // limpieza
+  } catch (error) {
+    console.error('Error al descargar el documento:', error);
+  }
+};
 
 
   // Función para manejar la selección de archivo
@@ -419,7 +439,7 @@ const Documentos = () => {
                           >
                             <Edit size={16} />
                           </Button>
-                          <button onClick={() => window.location.href = documento.ruta_archivo}>
+                          <button onClick={() => descargarDocumentoSeleccionado(documento.nombre_documentos)}>
                             <Download size={16} />
                           </button>
                         </div>

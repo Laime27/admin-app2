@@ -7,7 +7,7 @@ export interface Usuario {
     numero_referido:  number;
     fecha_nacimiento?: string;
     rol:              string;
-    dias_recordatorios: number;
+    direccion?:       string;
 }
 
 export interface HistorialReferido {

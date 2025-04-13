@@ -46,7 +46,8 @@ const ModalVer = ({ id, onClose, isOpen }: ModalVerProps) => {
            
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Nombre del Cliente</h3>
-              <p className="font-medium">{cita.usuario.nombre}</p>
+             
+              <p className="font-medium">{cita.usuario?.nombre || "No disponible"}</p>
             </div>
           </div>
 

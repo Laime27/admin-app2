@@ -7,7 +7,7 @@ import Usuarios from "@/pages/usuarios/Usuarios";
 import Login from "@/pages/login/login";
 import Dashboard from "@/layout/page";
 import Categorias from "@/pages/categorias/Categorias";
-
+import Profile from "@/pages/modal_profile/Profile";
 
 
 export const routes = [
@@ -25,7 +25,8 @@ export const routes = [
       { path: "migraciones", element: <Migraciones /> },
       { path: "usuarios", element: <Usuarios /> },
       { path: "categorias", element: <Categorias /> },
-
+      { path: "perfil", element: <Profile /> },
+    
       
     ],
   },

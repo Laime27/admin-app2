@@ -35,11 +35,8 @@ const formSchema = (isEditing: boolean) => z.object({
     ? z.string().optional()
     : z.string().min(8, { message: "La contraseña debe tener al menos 8 caracteres." }),
   fecha_nacimiento: z.string().optional(),
-  codigo_referido: z.string().optional(),
- 
-  dias_recordatorios: z.coerce.number({
-    required_error: "El número de días es obligatorio",
-  }).min(1, { message: "Debe ser al menos 1 día" })
+  codigo_referido: z.string().optional(), 
+  direccion: z.string().optional(),
   
 
 });
@@ -66,7 +63,7 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
       password: "",
       fecha_nacimiento: "",
       codigo_referido: "",
-      dias_recordatorios: 0,
+      direccion: "",
 
     },
   });
@@ -79,7 +76,7 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
       password: "",
       fecha_nacimiento: "",
       codigo_referido: "",
-      dias_recordatorios: 0,
+      direccion: "",
     });
 
     setError(null),
@@ -100,7 +97,7 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
             telefono: datosUsuario.usuario.telefono || "",
             fecha_nacimiento: datosUsuario.usuario.fecha_nacimiento || "",
             codigo_referido: datosUsuario.usuario.codigo_referido || "",
-            dias_recordatorios: datosUsuario.usuario.dias_recordatorios || "",
+            direccion: datosUsuario.usuario.direccion || "",
           });
         } catch (error) {
           console.error("Error al cargar datos del usuario:", error);
@@ -113,7 +110,7 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
           password: "",
           fecha_nacimiento: "",
           codigo_referido: "",
-          dias_recordatorios: 0,
+          direccion: "",
 
         });
       }
@@ -177,7 +174,7 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
 
         <FormField control={form.control} name="telefono" render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-300">Teléfono (opcional)</FormLabel>
+            <FormLabel className="text-gray-300">Teléfono</FormLabel>
             <FormControl>
               <Input className="rounded-lg" placeholder="Número de teléfono" {...field} />
             </FormControl>
@@ -237,17 +234,14 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
           )} />
         )}
 
-        <FormField control={form.control} name="dias_recordatorios" render={({ field }) => (
+        <FormField control={form.control} name="direccion" render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-300">Días de Recordatorios</FormLabel>
+            <FormLabel className="text-gray-300">Direccion</FormLabel>
             <FormControl>
               <Input 
-              type="number" className="rounded-lg" {...field} 
-              onInput={(e) => {
-                const input = e.target as HTMLInputElement;
-                input.value = input.value.replace(/[^0-9]/g, '');
-              }}
-              placeholder="Ingrese los días" />
+              type="text" className="rounded-lg" {...field} 
+             
+              placeholder="Ingrese la direccion" />
             </FormControl>
             <FormMessage />
           </FormItem>

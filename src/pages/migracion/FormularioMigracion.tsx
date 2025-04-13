@@ -33,6 +33,8 @@ interface ClienteMigracion {
   estado_asilo: string;
   fecha_cumple_asilo: string | null;
   nota: string;
+  dias_recordatorios?: number | null;
+
 }
 
 interface FormularioMigracionProps {
@@ -59,7 +61,8 @@ const FormularioMigracion = ({
     estado_caso: "",
     estado_asilo: "",
     fecha_cumple_asilo: null,
-    nota: ""
+    nota: "",
+    dias_recordatorios: 0,
   };
 
   const [formData, setFormData] = useState<Partial<ClienteMigracion>>(
@@ -104,6 +107,10 @@ const FormularioMigracion = ({
     }
     if (!formData.estado_caso) {
       newErrors.estado_caso = "El estado del caso es requerido";
+    }
+
+    if (!formData.estado_asilo) {
+      newErrors.estado_asilo = "El estado asido es requerido";
     }
    
     if (formData.estado_asilo === 'Sometido' && !formData.fecha_cumple_asilo) {
@@ -207,6 +214,8 @@ const FormularioMigracion = ({
                 {errors.estado_asilo && <p className="text-sm text-red-500 mt-1">{errors.estado_asilo}</p>}
               </div>
               
+            
+
               <div>
                 <Label htmlFor="nota">Notas Adicionales (Opcional)</Label>
                 <Textarea 
@@ -284,6 +293,18 @@ const FormularioMigracion = ({
                 />
                 {errors.fecha_permiso_trabajo && <p className="text-sm text-red-500 mt-1">{errors.fecha_permiso_trabajo}</p>}
               </div>
+
+              <div>
+                  <Label>dias recordatorios</Label>
+                  <Input 
+                    type="number" 
+                    min="0"
+                    value={formData.dias_recordatorios || ""}
+                    onChange={(e) => handleInputChange("dias_recordatorios", parseInt(e.target.value) || null)}
+                    />
+
+              </div>
+
             </div>
           </div>
           

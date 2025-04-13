@@ -1,5 +1,5 @@
-// stores/authStore.ts
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 type User = {
   id: number;
@@ -20,13 +20,25 @@ type User = {
 type AuthState = {
   user: User | null;
   setUser: (user: User) => void;
+  updateUser: (updatedFields: Partial<User>) => void;  // Nueva función para actualizar los campos
   logout: () => void;
 };
 
-const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),
-  logout: () => set({ user: null }),
-}));
+const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      setUser: (user) => set({ user }),
+      updateUser: (updatedFields) => 
+        set((state) => ({
+          user: state.user ? { ...state.user, ...updatedFields } : null,  // Combina el estado actual con los campos actualizados
+        })),
+      logout: () => set({ user: null }),
+    }),
+    {
+      name: 'user-storage',
+    }
+  )
+);
 
 export default useAuthStore;

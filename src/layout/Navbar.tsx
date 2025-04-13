@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { Search, Bell, SplitSquareVertical, Moon, Menu } from "lucide-react";
 import ProfileMenu from "@/layout/ProfileMenu";
+import useAuthStore from '@/store/authStore';
+
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -13,6 +15,10 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
   const toggleProfileMenu = () => {
     setProfileMenuOpen(!profileMenuOpen);
   };
+
+  const user = useAuthStore((state) => state.user);
+
+
 
   return (
     <div className="h-16 fixed top-0 right-0 left-0 lg:left-[174px] bg-background border-b border-sidebar-border flex items-center justify-between px-4 z-10">
@@ -39,7 +45,21 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           className="w-9 h-9 rounded-full bg-secondary/50 flex items-center justify-center cursor-pointer transition-colors hover:bg-secondary/70"
           onClick={toggleProfileMenu}
         >
-          <span className="text-sm font-medium text-white">JD</span>
+         
+          {
+            user?.imagen_ruta  ? (
+              <img 
+                src={user.imagen_ruta } 
+                alt="User Avatar" 
+                className="w-full h-full rounded-full object-cover" 
+              />
+            ) : (
+              <span className="text-sm font-medium text-white">JD</span>
+            )
+          }
+
+         
+
         </div>
 
         <ProfileMenu 
