@@ -22,6 +22,8 @@ import { Usuario } from "./types";
 import { CrearUsuario, ActualizarUsuario, ObtenerUsuario } from "@/servicios/usuarioServicio";
 import { Eye, EyeOff } from "lucide-react";
 
+import { mostrarExito, mostrarError } from "@/lib/toastUtils";
+
 
 const formSchema = (isEditing: boolean) => z.object({
   nombre: z.string().min(2, {
@@ -35,7 +37,6 @@ const formSchema = (isEditing: boolean) => z.object({
     ? z.string().optional()
     : z.string().min(8, { message: "La contraseña debe tener al menos 8 caracteres." }),
   fecha_nacimiento: z.string().optional(),
-  codigo_referido: z.string().optional(), 
   direccion: z.string().optional(),
   
 
@@ -62,7 +63,6 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
       telefono: "",
       password: "",
       fecha_nacimiento: "",
-      codigo_referido: "",
       direccion: "",
 
     },
@@ -75,7 +75,6 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
       telefono: "",
       password: "",
       fecha_nacimiento: "",
-      codigo_referido: "",
       direccion: "",
     });
 
@@ -96,7 +95,6 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
             email: datosUsuario.usuario.email,
             telefono: datosUsuario.usuario.telefono || "",
             fecha_nacimiento: datosUsuario.usuario.fecha_nacimiento || "",
-            codigo_referido: datosUsuario.usuario.codigo_referido || "",
             direccion: datosUsuario.usuario.direccion || "",
           });
         } catch (error) {
@@ -109,7 +107,6 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
           telefono: "",
           password: "",
           fecha_nacimiento: "",
-          codigo_referido: "",
           direccion: "",
 
         });
@@ -128,10 +125,11 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
           delete dataToUpdate.password;
         }
         const response = await ActualizarUsuario(usuario.id, dataToUpdate);
+        mostrarExito("Usuario actualizado correctamente");
         console.log(response);
       } else {
         const response = await CrearUsuario(data);
-       
+        mostrarExito("Usuario creado correctamente");
       }
       actualizarListado();
       onClose();
@@ -222,17 +220,7 @@ export const ModalUsuario = ({ isOpen, onClose, usuario, onSubmit, actualizarLis
           </FormItem>
         )} />
 
-        {!usuario && (
-          <FormField control={form.control} name="codigo_referido" render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-300">Código de referido (opcional)</FormLabel>
-              <FormControl>
-                <Input className="rounded-lg" placeholder="Código de referido" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-        )}
+       
 
         <FormField control={form.control} name="direccion" render={({ field }) => (
           <FormItem>

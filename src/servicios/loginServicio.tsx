@@ -25,3 +25,18 @@ export const user = async () => {
     throw new Error("Error de conexión con el servidor");
   }
 };
+
+
+
+export const logout = async () => {
+  try {
+    const response = await axios.post('/api/logout');
+    return response;
+  } catch (error: any) {
+    if (error.response) {
+      return error.response;
+    }
+    throw new Error("Error de conexión con el servidor");
+  }
+  
+}

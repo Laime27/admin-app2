@@ -11,7 +11,7 @@ function Dashboard() {
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="flex-1 lg:ml-[174px]">
           <Navbar onMenuClick={() => setSidebarOpen(true)} />
-          <main className="pt-16 px-4 md:px-6 lg:px-8">
+          <main className="pt-16 px-4 md:px-6 lg:px-8 mt-10">
              <Outlet/>
           </main>
         </div>

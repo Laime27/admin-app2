@@ -58,6 +58,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { mostrarExito, mostrarError } from "@/lib/toastUtils";
+
 
 export interface UsuarioCitas {
   id: number;
@@ -70,17 +72,18 @@ export interface UsuarioCitas {
   estado: string;
   created_at: Date;
   usuario: UsuarioClass;
+  categoria?: Categoria;
 }
 
 export interface UsuarioClass {
   id: number;
-  nombre: string;
+  nombre?: string;
   email: string;
 }
 
 interface Categoria {
   id: number;
-  nombre: string;
+  nombre?: string;
 }
 
 const Citas = () => {
@@ -100,6 +103,7 @@ const Citas = () => {
   const [modalEliminarAbierto, setModalEliminarAbierto] = useState(false);
 
   const { toast } = useToast();
+
 
   const listadoCitas = async () => {
     const citasData = await listarCitas();
@@ -189,12 +193,15 @@ const Citas = () => {
 
   const handleSaveCita = (formData: any) => {
     listadoCitas();
+    mostrarExito("La cita ha sido guardada correctamente.");
   };
 
   const manejarConfirmarEliminar = async (id) => {
     await eliminarCita(id);
     await listadoCitas();
     setModalEliminarAbierto(false);
+    mostrarExito("La cita ha sido eliminada correctamente.");
+
   };
 
   const renderizarModalEliminar = (id) => {
@@ -324,7 +331,8 @@ const Citas = () => {
                       <TableCell>{cita.id}</TableCell>
                       <TableCell className="flex items-center gap-1">
                         <User size={14} className="text-blue-500" />
-                        {cita.usuario.nombre}
+                        {cita.usuario ? cita.usuario.nombre : 'Usuario no disponible'}
+
                       </TableCell>
                       <TableCell>{cita.fecha_cita}</TableCell>
                       <TableCell className="flex items-center gap-1">

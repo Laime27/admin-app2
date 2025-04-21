@@ -122,7 +122,9 @@ const Usuarios = () => {
                 <TableRow>
                   <TableHead>Nombre</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Celular</TableHead>
+                  <TableHead>Telefono</TableHead>
+                  <TableHead>Fecha de nacimiento</TableHead>
+                  <TableHead>Direccion</TableHead>
                   <TableHead>Código de referidos</TableHead>
                   <TableHead>Cantidad de referidos</TableHead>
                  
@@ -136,11 +138,16 @@ const Usuarios = () => {
                       <TableCell>{usuario.nombre}</TableCell>
                       <TableCell>{usuario.email}</TableCell>
                       <TableCell>{usuario.telefono}</TableCell>
+                      <TableCell>{usuario.fecha_nacimiento}</TableCell>
+                      <TableCell>{usuario.direccion}</TableCell>
+
+
                       <TableCell>
                         <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
                           {usuario.codigo_referido}
                         </span>
                       </TableCell>
+                      
                       <TableCell>
                         <span className="font-medium">{usuario.numero_referido}</span>
                       </TableCell>

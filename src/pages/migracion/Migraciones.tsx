@@ -10,13 +10,27 @@ import {
   FileCheck, 
   User,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Trash2,
+
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import FormularioMigracion from "./FormularioMigracion";
 import { ListarUsuarios } from "@/servicios/usuarioServicio";
-import { ListarProcesos, CrearProceso, ActualizarProceso } from "@/servicios/migracionesServicio";
+import { ListarProcesos, CrearProceso, ActualizarProceso, EliminarProceso } from "@/servicios/migracionesServicio";
 import { toast } from "sonner";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { mostrarExito, mostrarError } from "@/lib/toastUtils";
 
 // Interfaces
 interface Usuario {
@@ -48,35 +62,40 @@ const Migraciones = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [clientes, setClientes] = useState<ClienteMigracion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalEliminarAbierto, setModalEliminarAbierto] = useState(false);
+  const [idAEliminar, setIdAEliminar] = useState(null);
+
+
+  const cargarDatos = async () => {
+    try {
+      const [usuariosData, procesosData] = await Promise.all([
+        ListarUsuarios(),
+        ListarProcesos()
+      ]);
+      
+      setUsuarios(usuariosData);
+      
+      // Agregar nombre de usuario a cada proceso
+      const procesosConUsuarios = procesosData.map((proceso: ClienteMigracion) => {
+        const usuario = usuariosData.find((u: Usuario) => u.id === proceso.usuario_id);
+        return {
+          ...proceso,
+          usuarioNombre: usuario?.nombre
+        };
+      });
+      
+      setClientes(procesosConUsuarios);
+    } catch (error) {
+      console.error("Error al cargar datos:", error);
+      toast.error("Error al cargar los datos");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Cargar usuarios y procesos
   useEffect(() => {
-    const cargarDatos = async () => {
-      try {
-        const [usuariosData, procesosData] = await Promise.all([
-          ListarUsuarios(),
-          ListarProcesos()
-        ]);
-        
-        setUsuarios(usuariosData);
-        
-        // Agregar nombre de usuario a cada proceso
-        const procesosConUsuarios = procesosData.map((proceso: ClienteMigracion) => {
-          const usuario = usuariosData.find((u: Usuario) => u.id === proceso.usuario_id);
-          return {
-            ...proceso,
-            usuarioNombre: usuario?.nombre
-          };
-        });
-        
-        setClientes(procesosConUsuarios);
-      } catch (error) {
-        console.error("Error al cargar datos:", error);
-        toast.error("Error al cargar los datos");
-      } finally {
-        setLoading(false);
-      }
-    };
+   
 
     cargarDatos();
   }, []);
@@ -106,11 +125,11 @@ const Migraciones = () => {
       if (selectedCliente) {
         // Actualizar
         await ActualizarProceso(selectedCliente.id, data);
-        toast.success("Proceso actualizado exitosamente");
+        mostrarExito("Proceso actualizado exitosamente");
       } else {
         // Crear
         await CrearProceso(data as ClienteMigracion);
-        toast.success("Proceso creado exitosamente");
+        mostrarExito("Proceso creado exitosamente");
       }
       
       // Recargar la lista
@@ -156,9 +175,40 @@ const Migraciones = () => {
     );
   };
 
+  const manejarEliminar = async (id) => {
+    try {
+      await EliminarProceso(id);
+      mostrarExito("Proceso eliminado exitosamente");
+      cargarDatos();
+    }
+    catch (error) {
+      console.error("Error al eliminar:", error);
+      toast.error("Error al eliminar el proceso");
+    }
+  };
+
+  const manejarConfirmarEliminar = async () => {
+    if (!idAEliminar) return;
+  
+    await manejarEliminar(idAEliminar);
+    setModalEliminarAbierto(false);
+    setIdAEliminar(null); 
+  };
+  
+  
+
+    const renderizarModalEliminar = (id) => {
+      setIdAEliminar(id);
+      setModalEliminarAbierto(true);
+    };
+    
  
 
   return (
+
+    
+
+
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Gestión de Migraciones</h1>
@@ -167,6 +217,27 @@ const Migraciones = () => {
           <span>Nuevo Cliente</span>
         </Button>
       </div>
+
+      <AlertDialog open={modalEliminarAbierto} onOpenChange={setModalEliminarAbierto}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción no se puede deshacer. Se eliminará permanentemente la cita
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-500 hover:bg-red-600"
+                onClick={manejarConfirmarEliminar}
+              >
+                Eliminar
+              </AlertDialogAction>
+
+            </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
 
       <Card>
         <CardHeader className="bg-muted/50">
@@ -267,9 +338,16 @@ const Migraciones = () => {
                           >
                             Editar
                           </Button>
-                          <Button variant="ghost" size="icon">
-                            <FileCheck size={16} />
-                          </Button>
+                         
+                           <Button
+                              size="icon"
+                              variant="ghost"
+                              className="w-7 h-7 bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                              onClick={() => renderizarModalEliminar(cliente.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+
                         </div>
                       </TableCell>
                     </TableRow>

@@ -51,4 +51,20 @@ export const ActualizarProceso = async (id: number, data: Partial<ProcesoInmigra
         console.error("Error al actualizar proceso:", error);
         throw error;
     }
+
 };
+
+
+export const EliminarProceso = async (id: number) => {
+    try {
+        const response = await axios.delete(`/api/inmigracion/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error al eliminar proceso:", error);
+        throw error;
+    }
+};
+
+
+
+

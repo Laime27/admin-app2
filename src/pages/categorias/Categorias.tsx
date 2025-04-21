@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ListarCategorias, CrearCategoria, ActualizarCategoria, EliminarCategoria } from "@/servicios/categoriaServicio";
 import { useToast } from "@/components/ui/use-toast";
 
+import { mostrarExito, mostrarError } from "@/lib/toastUtils";
 
 interface Categoria {
   id: number;
@@ -44,8 +45,10 @@ const Categorias = () => {
       setCargando(true);
       const respuesta = await ListarCategorias();
 
-        setCategorias(respuesta); 
-        console.log(respuesta); 
+      const categoriasFiltradas = respuesta.filter(cat => cat.id !== 1);
+
+      setCategorias(categoriasFiltradas);
+      console.log(categoriasFiltradas);
     
     } catch (error) {
       mostrarError("No se pudieron cargar las categorías");
@@ -99,7 +102,7 @@ const Categorias = () => {
         setCargando(true);
 
        const respuesta = await EliminarCategoria(categoriaAEliminar.id);
-
+        console.log(respuesta);
         mostrarExito("Categoría eliminada correctamente");
 
         await cargarCategorias();
@@ -108,6 +111,9 @@ const Categorias = () => {
 
         setCategoriaAEliminar(null);
     
+        if (respuesta.status === 500) {
+          mostrarError("No se puede eliminar esta categoría porque tiene citas asociadas.");
+        }
 
       } catch (error) {
         mostrarError("Error de conexión con el servidor");

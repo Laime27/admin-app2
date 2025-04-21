@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { User, Settings, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '@/store/authStore';
-
+import {logout} from '@/servicios/loginServicio';
 
 interface ProfileMenuProps {
   isOpen: boolean;
@@ -42,6 +42,15 @@ const ProfileMenu = ({ isOpen, onClose, avatarRef }: ProfileMenuProps) => {
 
   if (!isOpen) return null;
 
+  const Cerrarsesion = async () => {
+    await logout();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
+
+  };
+  
+
   return (
     <div 
       ref={menuRef}
@@ -63,7 +72,7 @@ const ProfileMenu = ({ isOpen, onClose, avatarRef }: ProfileMenuProps) => {
           onClick={handleProfileClick}
         >
           <User size={16} />
-          <span>Profile</span>
+          <span>Perfil</span>
         </button>
         
      
@@ -73,11 +82,12 @@ const ProfileMenu = ({ isOpen, onClose, avatarRef }: ProfileMenuProps) => {
       <div className="border-t border-secondary/20 py-1">
         <button 
           className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-secondary/20 flex items-center gap-2"
-          onClick={() => console.log('Sign Up clicked')}
+          onClick={() => Cerrarsesion()}
         >
           <LogIn size={16} />
-          <span>Sign Up</span>
+          <span>Cerrar Sesion</span>
         </button>
+
       </div>
     </div>
   );
